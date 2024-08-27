@@ -2,6 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from axes import make_rail_axes
 
 W6A_LOWER = np.array([
     [680, 75],  # 1D
@@ -93,22 +94,6 @@ W12_UPPER = np.array([
     [575, 3896],
     [0, 3965],
 ])
-
-
-def plot_rail(ax, x=0, y=0):
-    """Load the data and plot it."""
-    data = np.genfromtxt("point_data/60e1_rail_points.csv", dtype=np.float64, delimiter=",")
-    ax.fill(data[:, 0] + x, data[:, 1] + y, color="k")
-
-
-def make_rail_axes(ax):
-    """Add two rails and some lines to an axes."""
-    ax.set_aspect("equal")
-    ax.axis("off")
-    plot_rail(ax, x=-1435/2, y=-86)
-    plot_rail(ax, x=1435/2, y=-86)
-    ax.axvline(0, linestyle="-.", color="k")
-    ax.axhline(0, linestyle=":", color="k", linewidth=0.5)
 
 
 def draw_train(ax, lower, upper):
