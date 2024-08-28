@@ -111,7 +111,7 @@ def main():
     """Plot stuff."""
     fig, axs = plt.subplots()
     make_rail_axes(axs)
-    draw_train(axs, W6A_LOWER, W10A_UPPER)
+    draw_train(axs, W6A_LOWER, W12_UPPER)
 
     container = np.array([
         [1219, 3510],

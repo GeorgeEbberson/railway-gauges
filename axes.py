@@ -10,7 +10,7 @@ def plot_rail(ax, x=0, y=0):
 
 def make_rail_axes(ax):
     """Add two rails and some lines to an axes."""
-    ax.set_aspect("equal")
+    ax.set_aspect("equal", adjustable="datalim")
     ax.axis("off")
     plot_rail(ax, x=-1435/2, y=-86)
     plot_rail(ax, x=1435/2, y=-86)
