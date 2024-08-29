@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from axes import make_rail_axes
+from plotting import make_rail_axes
 
 W6A_LOWER = np.array([
     [680, 75],  # 1D
