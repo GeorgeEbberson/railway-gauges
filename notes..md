@@ -7,4 +7,10 @@ Threads to pull on:
       British Rail Department of Mechanical and Electrical Engineering (DM&EE)
       drawing published September 1990
 * Putting all the gauges onto one diagram
-* 
+
+
+Gauges to plot:
+
+39  special - stepped
+52  special - sloped then curve
+59  special - curved then slope

@@ -19,16 +19,20 @@ def make_rail_axes(ax):
     ax.axhline(0, linestyle=":", color="k", linewidth=0.5)
 
 
-class CubicSplineGauge:
+class Gauge:
 
     def __init__(self, name, points):
         """Construct an instance."""
         self.name = name
         self.points = np.array(points)
 
-    def plot(self, ax, **kwargs):
+
+class CubicSplineGauge(Gauge):
+    """Gauge whose top follows a curve, which will be cubic spline fitted."""
+
+    def plot(self, ax):
         """Draw the gauge on ax."""
-        sdata = self.points
+        sdata = self.points.copy()
         sdata[:, [0, 1]] = sdata[:, [1, 0]]
         sdata[:, 0] *= -0.5
         points = np.concat((sdata, np.flipud(sdata[:-1, :] * np.array([-1, 1]))))
@@ -37,4 +41,66 @@ class CubicSplineGauge:
         xs = np.linspace(np.min(points[:, 0]), np.max(points[:, 0]), 50)
         x_vals = np.concat(([xs[0]], xs, [xs[-1]]))
         y_vals = np.concat(([0], cs(xs), [0]))
-        ax.plot(x_vals, y_vals, label=self.name, **kwargs)
+        if self.name == "BR20873_52":
+            ax.plot(x_vals, y_vals, label=self.name)
+
+
+class LinearGauge(Gauge):
+    """Gauge defined by straight line joining points."""
+
+    def plot(self, ax):
+        """Draw gauge on ax."""
+        sdata = self.points.copy()
+        sdata[:, [0, 1]] = sdata[:, [1, 0]]
+        sdata[:, 0] *= -0.5
+        points = np.concat((sdata, np.flipud(sdata * np.array([-1, 1]))))
+
+        x_vals = np.concat(([points[0, 0]], points[:, 0], [points[-1, 0]]))
+        y_vals = np.concat(([0], points[:, 1], [0]))
+        # ax.plot(x_vals, y_vals, label=self.name)
+
+
+class TruncatedGauge(Gauge):
+    """Gauge defined by a continuous curve then flat bit on top."""
+
+    def plot(self, ax):
+        """Draw gauge on ax."""
+        # Treat it just like a CubicSpline except we then only draw the two sides.
+        sdata = self.points.copy()
+        sdata[:, [0, 1]] = sdata[:, [1, 0]]
+        sdata[:, 0] *= -0.5
+        points = np.concat((sdata, np.flipud(sdata * np.array([-1, 1]))))
+
+        cs = CubicSpline(points[:, 0], points[:, 1])
+
+        xs1 = np.linspace(self.points[0, 1], self.points[-1, 1], 50) * -0.5
+        xs = np.concat((xs1, -1 * xs1[::-1]))
+        x_vals = np.concat(([xs[0]], xs, [xs[-1]]))
+        y_vals = np.concat(([0], cs(xs), [0]))
+        # ax.plot(x_vals, y_vals, label=self.name)
+
+
+class LiftedGauge(Gauge):
+    """Gauge where there is a flat-topped step in the middle."""
+
+    def __init__(self, *args, **kwargs):
+        self.curve_top_height = kwargs.pop("curve_top_height")
+        super().__init__(*args, **kwargs)
+
+    def plot(self, ax):
+        """Draw gauge on ax."""
+        # Treat it just like a CubicSpline except we then only draw the two sides.
+        sdata = self.points[:-1, :].copy()  # Last row not in spline data
+        sdata = np.append(sdata, [[self.curve_top_height, 0]], axis=0)
+        sdata[:, [0, 1]] = sdata[:, [1, 0]]
+        sdata[:, 0] *= -0.5
+        points = np.concat((sdata, np.flipud(sdata[:-1, :] * np.array([-1, 1]))))
+
+        cs = CubicSpline(points[:, 0], points[:, 1])
+
+        height = self.points[-1, 0]
+        xs1 = np.linspace(self.points[0, 1], self.points[-1, 1], 50) * -0.5
+        xs2 = -1 * xs1[::-1]
+        x_vals = np.concat(([xs1[0]], xs1, [xs1[-1], xs2[0]], xs2, [xs2[-1]]))
+        y_vals = np.concat(([0], cs(xs1), [height, height], cs(xs2), [0]))
+        # ax.plot(x_vals, y_vals, label=self.name)
