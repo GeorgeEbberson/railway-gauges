@@ -9,17 +9,20 @@ def plot_rail(ax, x=0, y=0):
     ax.fill(data[:, 0] + x, data[:, 1] + y, color="k")
 
 
-def make_rail_axes(ax):
+def make_rail_axes(ax, origin=True):
     """Add two rails and some lines to an axes."""
     ax.set_aspect("equal", adjustable="datalim")
     ax.axis("off")
     plot_rail(ax, x=-1435/2, y=-86)
     plot_rail(ax, x=1435/2, y=-86)
-    ax.axvline(0, linestyle="-.", color="k")
-    ax.axhline(0, linestyle=":", color="k", linewidth=0.5)
+    if origin:
+        ax.axvline(0, linestyle="-.", color="k")
+        ax.axhline(0, linestyle=":", color="k", linewidth=0.5)
 
 
 class Gauge:
+
+    PLOTTING_ARGS = {"color": "k", "linewidth": 0.5}
 
     def __init__(self, name, points):
         """Construct an instance."""
@@ -41,8 +44,7 @@ class CubicSplineGauge(Gauge):
         xs = np.linspace(np.min(points[:, 0]), np.max(points[:, 0]), 50)
         x_vals = np.concat(([xs[0]], xs, [xs[-1]]))
         y_vals = np.concat(([0], cs(xs), [0]))
-        if self.name == "BR20873_52":
-            ax.plot(x_vals, y_vals, label=self.name)
+        ax.plot(x_vals, y_vals, label=self.name, **self.PLOTTING_ARGS)
 
 
 class LinearGauge(Gauge):
@@ -57,7 +59,7 @@ class LinearGauge(Gauge):
 
         x_vals = np.concat(([points[0, 0]], points[:, 0], [points[-1, 0]]))
         y_vals = np.concat(([0], points[:, 1], [0]))
-        # ax.plot(x_vals, y_vals, label=self.name)
+        ax.plot(x_vals, y_vals, label=self.name, **self.PLOTTING_ARGS)
 
 
 class TruncatedGauge(Gauge):
@@ -77,7 +79,7 @@ class TruncatedGauge(Gauge):
         xs = np.concat((xs1, -1 * xs1[::-1]))
         x_vals = np.concat(([xs[0]], xs, [xs[-1]]))
         y_vals = np.concat(([0], cs(xs), [0]))
-        # ax.plot(x_vals, y_vals, label=self.name)
+        ax.plot(x_vals, y_vals, label=self.name, **self.PLOTTING_ARGS)
 
 
 class LiftedGauge(Gauge):
@@ -103,4 +105,4 @@ class LiftedGauge(Gauge):
         xs2 = -1 * xs1[::-1]
         x_vals = np.concat(([xs1[0]], xs1, [xs1[-1], xs2[0]], xs2, [xs2[-1]]))
         y_vals = np.concat(([0], cs(xs1), [height, height], cs(xs2), [0]))
-        # ax.plot(x_vals, y_vals, label=self.name)
+        ax.plot(x_vals, y_vals, label=self.name, **self.PLOTTING_ARGS)
